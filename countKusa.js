@@ -33,6 +33,14 @@ const question = (question) => {
   })
 }
 
+const input = async () => {
+  let answers = []
+  for (const q of questions) {
+    answers.push(await question(q))
+  }
+  return answers
+}
+
 const getData = async (accountName, token) => {
   const res = await fetch('https://api.github.com/graphql', {
     method: 'POST',
@@ -72,11 +80,7 @@ const output = (datas) => {
 }
 
 const main = async () => {
-  let answers = []
-  for (const q of questions) {
-    answers.push(await question(q))
-  }
-  const [accountName, token, start, end] = answers
+  const [accountName, token, start, end] = await input()
 
   const data = await getData(accountName, token)
   const shapedData = shapeData(data, start, end)
