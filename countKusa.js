@@ -65,11 +65,12 @@ const shapeData = (data, start, end) => {
   const weeks = data.data.user.contributionsCollection.contributionCalendar.weeks
   const info = weeks.map((week) =>
     week.contributionDays.map((day) =>
-      day.contributionCount > 0 ? day.date.replace(/-/g, '') : ''
+      day.contributionCount > 0 ? day.date : ''
     )
   )
   const date = [].concat
     .apply([], info)
+    .map((day) => day.replace(/-/g, ''))
     .filter((day) => start <= day && day <= end)
   return date
 }
