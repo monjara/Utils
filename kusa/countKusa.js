@@ -1,7 +1,15 @@
 import readline from 'readline'
 import fetch from 'node-fetch'
 
-const questions = ['account name', 'token', 'start', 'end']
+const info = {
+  accountName: 'monjara',
+  token: '',
+  start: '20211001',
+  end: '20220306',
+}
+
+// const questions = ['account name', 'token', 'start', 'end']
+const questions = ['token']
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -42,18 +50,21 @@ const input = async () => {
 }
 
 const getData = async (accountName, token) => {
-  const res = await fetch('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      // prettier-ignore
-      'Authorization': `bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables: { accountName },
-    }),
-  })
+  const res = await fetch(
+    'https://api.github.com/graphql',
+    {
+      method: 'POST',
+      headers: {
+        // prettier-ignore
+        'Authorization': `bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables: { accountName },
+      }),
+    }
+  )
     .then((r) => r.json())
     .then((data) => data)
 
@@ -75,18 +86,62 @@ const shapeData = (data, start, end) => {
   return date
 }
 
-const output = (datas) => {
+const yyyymmddToDate = (strDate) => {
+  let y = strDate.slice(0, 4) // YYYY
+  let m = strDate.slice(4, 6) // MM
+  let d = strDate.slice(6, 8) // DD
+  return new Date(+y, +m - 1, d, 9)
+}
+
+const calculateDate = (datas, start, end) => {
+  const startDate = yyyymmddToDate(start)
+  const endDate = yyyymmddToDate(end)
   const contributedDayLength = datas.length
-  console.log('この期間中、' + contributedDayLength + '日間草生やしました')
+  const term = (endDate - startDate) / 86400000
+  const contributionRate = contributedDayLength / term
+  const contributionDaysPerWeek =
+    Math.round(7 * contributionRate * 10) / 10
+  return {
+    start,
+    end,
+    term,
+    contributedDayLength,
+    contributionDaysPerWeek,
+  }
+}
+
+// const output = (datas) => {
+//   const contributedDayLength = datas.length
+//   console.log(
+//     'この期間中、' +
+//       contributedDayLength +
+//       '日間草生やしました'
+//   )
+// }
+const output = (datas) => {
+  console.log('\n')
+  console.log(
+    `対象期間: ${datas.start} ~ ${datas.end}, 合計日数: ${datas.term}`
+  )
+  console.log(
+    `この期間中, ${datas.contributedDayLength}日間草を生やしました`
+  )
+  console.log(
+    `7日間あたりの草日数は${datas.contributionDaysPerWeek}日間です`
+  )
 }
 
 const main = async () => {
-  const [accountName, token, start, end] = await input()
+  // const [accountName, token, start, end] = await input()
+  const token = await input()
+  const { accountName, start, end } = info
 
   const data = await getData(accountName, token)
   const shapedData = shapeData(data, start, end)
+  const dateResult = calculateDate(shapedData, start, end)
 
-  output(shapedData)
+  //  output(shapedData)
+  output(dateResult, start, end)
   rl.close()
 }
 
