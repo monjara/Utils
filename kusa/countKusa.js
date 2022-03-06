@@ -127,7 +127,7 @@ const main = async () => {
   const shapedData = shapeData(data, start, end)
   const dateResult = calculateDate(shapedData, start, end)
 
-  output(dateResult, start, end)
+  output(dateResult)
   rl.close()
 }
 
