@@ -1,15 +1,12 @@
 import readline from 'readline'
 import fetch from 'node-fetch'
 
-const info = {
-  accountName: 'monjara',
-  token: '',
-  start: '20211001',
-  end: '20220306',
-}
-
-// const questions = ['account name', 'token', 'start', 'end']
-const questions = ['token']
+const questions = [
+  'account name',
+  'token',
+  'start(yyyyMMdd)',
+  'end(yyyyMMdd)',
+]
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -110,14 +107,6 @@ const calculateDate = (datas, start, end) => {
   }
 }
 
-// const output = (datas) => {
-//   const contributedDayLength = datas.length
-//   console.log(
-//     'この期間中、' +
-//       contributedDayLength +
-//       '日間草生やしました'
-//   )
-// }
 const output = (datas) => {
   console.log('\n')
   console.log(
@@ -132,15 +121,12 @@ const output = (datas) => {
 }
 
 const main = async () => {
-  // const [accountName, token, start, end] = await input()
-  const token = await input()
-  const { accountName, start, end } = info
+  const [accountName, token, start, end] = await input()
 
   const data = await getData(accountName, token)
   const shapedData = shapeData(data, start, end)
   const dateResult = calculateDate(shapedData, start, end)
 
-  //  output(shapedData)
   output(dateResult, start, end)
   rl.close()
 }
